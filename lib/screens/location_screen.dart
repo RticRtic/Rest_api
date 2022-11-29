@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:rest_api/api/api_service.dart';
 import 'package:rest_api/models/usermodel.dart';
@@ -16,6 +17,14 @@ class _LocationScreenState extends State<LocationScreen> {
   final inputText = TextEditingController();
   final apiService = ApiService();
   Future<UserModel>? futureUser;
+
+  void addToFirebase(String name, int age) {
+    final person = <String, dynamic>{
+      "name": name,
+      "age": age,
+    };
+    FirebaseFirestore.instance.collection("Test").add(person);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +90,11 @@ class _LocationScreenState extends State<LocationScreen> {
                       },
                       child: const Text("POST")),
                   builder(),
+                  ElevatedButton(
+                      onPressed: () {
+                        addToFirebase("janne", 32);
+                      },
+                      child: const Icon(Icons.fire_extinguisher))
                 ],
               )),
         ),
