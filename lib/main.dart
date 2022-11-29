@@ -51,6 +51,8 @@ class _HomeState extends State<Home> {
   late List<UserModel>? userModel = [];
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   late AndroidNotificationChannel channel;
+  TextEditingController title = TextEditingController();
+  TextEditingController body = TextEditingController();
 
   @override
   void initState() {
@@ -61,34 +63,6 @@ class _HomeState extends State<Home> {
     listenFCM();
     getToken();
     FirebaseMessaging.instance.subscribeToTopic("Janne");
-
-    // FirebaseMessaging.onMessage.listen((RemoteMessage event) {
-    //   showDialog(
-    //       context: context,
-    //       builder: ((context) {
-    //         return AlertDialog(
-    //           title: const Text(
-    //             "Notification",
-    //             style: TextStyle(fontFamily: "Times"),
-    //           ),
-    //           content: Text(event.notification!.body!),
-    //           actions: [
-    //             TextButton(
-    //               onPressed: () {
-    //                 Navigator.of(context).pop();
-    //               },
-    //               child: const Text(
-    //                 "OK!",
-    //                 style: TextStyle(fontFamily: "Times", color: Colors.white),
-    //               ),
-    //             ),
-    //           ],
-    //         );
-    //       }));
-    // });
-    // FirebaseMessaging.onMessageOpenedApp.listen((message) {
-    //   print("Message clicked");
-    // });
   }
 
   void saveUserToken(String token) async {
@@ -104,7 +78,7 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void sendPushMessage() async {
+  void sendPushMessage(String title, String body) async {
     try {
       await http.post(
         Uri.parse("https://fcm.googleapis.com/fcm/send"),
@@ -116,8 +90,8 @@ class _HomeState extends State<Home> {
         body: jsonEncode(
           <String, dynamic>{
             "notification": <String, dynamic>{
-              "body": "This Is A Notification!",
-              "title": "Hello!"
+              "title": title,
+              "body": body,
             },
             "priority": "high",
             "data": <String, dynamic>{
@@ -196,9 +170,91 @@ class _HomeState extends State<Home> {
     });
   }
 
+  // startNotificationSheet(BuildContext context) {
+  //   showModalBottomSheet(
+  //       context: context,
+  //       builder: (_) {
+  //         return SizedBox(
+  //           height: 200,
+  //           child: Center(
+  //               child: Column(
+  //             mainAxisAlignment: MainAxisAlignment.center,
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               TextFormField(
+  //                 controller: title,
+  //               ),
+  //               TextFormField(
+  //                 controller: body,
+  //               ),
+  //               ElevatedButton(
+  //                 onPressed: () async {
+  //                   sendPushMessage(title.text, body.text);
+  //                 },
+  //                 child: const Text("Send"),
+  //               ),
+  //             ],
+  //           )),
+  //         );
+  //       });
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: Drawer(
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color.fromRGBO(217, 142, 210, 0.5),
+                  Color.fromRGBO(239, 236, 222, 0.7)
+                ]),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextFormField(
+                keyboardType: TextInputType.text,
+                controller: title,
+                decoration: const InputDecoration(
+                  filled: true,
+                  fillColor: Colors.grey,
+                  labelText: "Title",
+                ),
+              ),
+              const Padding(padding: EdgeInsets.only(top: 10.0)),
+              TextFormField(
+                keyboardType: TextInputType.text,
+                controller: body,
+                decoration: const InputDecoration(
+                  filled: true,
+                  fillColor: Colors.grey,
+                  labelText: "Message",
+                ),
+              ),
+              const Padding(padding: EdgeInsets.only(top: 10.0)),
+              ElevatedButton.icon(
+                onPressed: () {
+                  sendPushMessage(title.text, body.text);
+                  title.clear();
+                  body.clear();
+                },
+                icon: const Icon(
+                  Icons.notification_add_outlined,
+                ),
+                label: const Text(
+                  "Send",
+                  style: TextStyle(color: Colors.black, fontFamily: "Times"),
+                ),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
+              )
+            ],
+          ),
+        ),
+      ),
       appBar: AppBar(
         centerTitle: true,
         title: const Text("Employees"),
@@ -270,12 +326,6 @@ class _HomeState extends State<Home> {
                                   fontSize: 15.0),
                             ),
                           ),
-                          ElevatedButton(
-                            onPressed: () {
-                              sendPushMessage();
-                            },
-                            child: const Text("Send"),
-                          ),
                         ],
                       ),
                     ),
@@ -283,6 +333,12 @@ class _HomeState extends State<Home> {
                 }),
               ),
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          //startNotificationSheet(context);
+        },
+        child: const Icon(Icons.notification_add_outlined),
+      ),
     );
   }
 }
