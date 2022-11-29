@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class ProfileColumn extends StatefulWidget {
   String string;
   IconData icon;
+
   ProfileColumn({
     super.key,
     required this.icon,

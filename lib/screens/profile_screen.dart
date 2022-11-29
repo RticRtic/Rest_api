@@ -1,4 +1,6 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:rest_api/providers/push_provider.dart';
 import 'package:rest_api/screens/location_screen.dart';
 import 'package:rest_api/widgets/profile_columns_utilites.dart';
 import 'package:rest_api/widgets/profile_title.dart';
@@ -14,6 +16,18 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  final pushProvider = PushProvider();
+
+  @override
+  void initState() {
+    super.initState();
+    pushProvider.requestPermission();
+    pushProvider.loadFcm();
+    pushProvider.listenFCM();
+    pushProvider.getDeviceToken();
+    FirebaseMessaging.instance.subscribeToTopic("Janne");
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,6 +41,18 @@ class _ProfilePageState extends State<ProfilePage> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
+          actions: [
+            IconButton(
+                onPressed: () async {
+                  pushProvider.sendPushMessage(
+                      widget.userModel![widget.index].username,
+                      "Daily standup 09:15 -Room 007-");
+                },
+                icon: const Icon(
+                  Icons.notification_add_outlined,
+                  color: Colors.black,
+                ))
+          ],
           leading: GestureDetector(
             onTap: () {
               Navigator.of(context).pop();

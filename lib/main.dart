@@ -81,7 +81,7 @@ class _HomeState extends State<Home> {
             children: [
               DrawerItem(title: title, message: body),
               ElevatedButton.icon(
-                onPressed: () {
+                onPressed: () async {
                   pushProvider.sendPushMessage(title.text, body.text);
                   title.clear();
                   body.clear();
