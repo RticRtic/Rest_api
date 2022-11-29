@@ -1,15 +1,11 @@
-import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:rest_api/api/api_service.dart';
 import 'package:rest_api/models/usermodel.dart';
+import 'package:rest_api/providers/push_provider.dart';
 import 'package:rest_api/screens/profile_screen.dart';
-import "package:http/http.dart" as http;
+import 'package:rest_api/widgets/drawer.dart';
 
 @pragma("vm:entry-point")
 Future<void> messageHandler(RemoteMessage message) async {
@@ -44,123 +40,20 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-  FirebaseFirestore db = FirebaseFirestore.instance;
-  FirebaseAuth auth = FirebaseAuth.instance;
-  String userToken = "";
-  late List<UserModel>? userModel = [];
-  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-  late AndroidNotificationChannel channel;
   TextEditingController title = TextEditingController();
   TextEditingController body = TextEditingController();
+  final pushProvider = PushProvider();
+  late List<UserModel>? userModel = [];
 
   @override
   void initState() {
     super.initState();
     getApi();
-    requestPermission();
-    loadFcm();
-    listenFCM();
-    getToken();
+    pushProvider.requestPermission();
+    pushProvider.loadFcm();
+    pushProvider.listenFCM();
+    pushProvider.getDeviceToken();
     FirebaseMessaging.instance.subscribeToTopic("Janne");
-  }
-
-  void saveUserToken(String token) async {
-    db.collection("userToken").doc(auth.currentUser?.uid).set({"token": token});
-  }
-
-  void getToken() async {
-    await FirebaseMessaging.instance.getToken().then((token) {
-      setState(() {
-        userToken = token as String;
-      });
-      saveUserToken(userToken);
-    });
-  }
-
-  void sendPushMessage(String title, String body) async {
-    try {
-      await http.post(
-        Uri.parse("https://fcm.googleapis.com/fcm/send"),
-        headers: <String, String>{
-          "content-type": "application/json",
-          "Authorization":
-              "key=AAAAaaSbt0w:APA91bFKVM5Evit-eHewVTwka_0AoSD2vZctVoyXxCeNZp_K4zW9jXElArVaaOIJtEmMPIAL8mRgqsY5HCe_EPyCqgCCtGgLmNlk4bq1j2narDU_n-RFsMfw-7MIC11QusnEwPkvWUl4"
-        },
-        body: jsonEncode(
-          <String, dynamic>{
-            "notification": <String, dynamic>{
-              "title": title,
-              "body": body,
-            },
-            "priority": "high",
-            "data": <String, dynamic>{
-              "click_action": "FLUTTER_NOTIFICATION_CLICK",
-              "id": "1",
-              "status": "done"
-            },
-            "to": userToken,
-          },
-        ),
-      );
-    } catch (e) {
-      print(" Error to send PushNotification $e");
-    }
-  }
-
-  void requestPermission() async {
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-    NotificationSettings settings = await messaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print("User granted permission");
-    } else if (settings.authorizationStatus ==
-        AuthorizationStatus.provisional) {
-      print("User granted provisional permission");
-    } else {
-      print("User declined or has not accepted permission");
-    }
-  }
-
-  void listenFCM() async {
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      RemoteNotification? notification = message.notification;
-      AndroidNotification? android = message.notification?.android;
-      if (notification != null && android != null && !kIsWeb) {
-        flutterLocalNotificationsPlugin.show(
-            notification.hashCode,
-            notification.title,
-            notification.body,
-            NotificationDetails(
-                android: AndroidNotificationDetails(channel.id, channel.name,
-                    icon: "launch_background")));
-      }
-    });
-  }
-
-  void loadFcm() async {
-    if (!kIsWeb) {
-      channel = const AndroidNotificationChannel(
-          "high_importance_channel", "High Importance Notifications",
-          importance: Importance.high, enableVibration: true);
-
-      flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-      await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.createNotificationChannel(channel);
-
-      await FirebaseMessaging.instance
-          .setForegroundNotificationPresentationOptions(
-              alert: true, badge: true, sound: true);
-    }
   }
 
   void getApi() async {
@@ -169,35 +62,6 @@ class _HomeState extends State<Home> {
       setState(() {});
     });
   }
-
-  // startNotificationSheet(BuildContext context) {
-  //   showModalBottomSheet(
-  //       context: context,
-  //       builder: (_) {
-  //         return SizedBox(
-  //           height: 200,
-  //           child: Center(
-  //               child: Column(
-  //             mainAxisAlignment: MainAxisAlignment.center,
-  //             mainAxisSize: MainAxisSize.min,
-  //             children: [
-  //               TextFormField(
-  //                 controller: title,
-  //               ),
-  //               TextFormField(
-  //                 controller: body,
-  //               ),
-  //               ElevatedButton(
-  //                 onPressed: () async {
-  //                   sendPushMessage(title.text, body.text);
-  //                 },
-  //                 child: const Text("Send"),
-  //               ),
-  //             ],
-  //           )),
-  //         );
-  //       });
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -214,31 +78,11 @@ class _HomeState extends State<Home> {
                 ]),
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              TextFormField(
-                keyboardType: TextInputType.text,
-                controller: title,
-                decoration: const InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey,
-                  labelText: "Title",
-                ),
-              ),
-              const Padding(padding: EdgeInsets.only(top: 10.0)),
-              TextFormField(
-                keyboardType: TextInputType.text,
-                controller: body,
-                decoration: const InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey,
-                  labelText: "Message",
-                ),
-              ),
-              const Padding(padding: EdgeInsets.only(top: 10.0)),
+              DrawerItem(title: title, message: body),
               ElevatedButton.icon(
                 onPressed: () {
-                  sendPushMessage(title.text, body.text);
+                  pushProvider.sendPushMessage(title.text, body.text);
                   title.clear();
                   body.clear();
                 },
@@ -250,7 +94,7 @@ class _HomeState extends State<Home> {
                   style: TextStyle(color: Colors.black, fontFamily: "Times"),
                 ),
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-              )
+              ),
             ],
           ),
         ),
@@ -334,9 +178,7 @@ class _HomeState extends State<Home> {
               ),
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          //startNotificationSheet(context);
-        },
+        onPressed: () {},
         child: const Icon(Icons.notification_add_outlined),
       ),
     );
