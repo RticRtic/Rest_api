@@ -107,58 +107,38 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       ProfileTitle(title: "Profile"),
                       ProfileColumn(
-                        userModel: widget.userModel,
-                        index: widget.index,
                         icon: (Icons.person_outline),
                         string: widget.userModel![widget.index].name,
                       ),
                       ProfileColumn(
-                          userModel: widget.userModel,
-                          index: widget.index,
                           icon: (Icons.face),
                           string: widget.userModel![widget.index].username),
                       ProfileColumn(
-                          userModel: widget.userModel,
-                          index: widget.index,
                           icon: (Icons.phone_android_outlined),
                           string: widget.userModel![widget.index].phone),
                       ProfileColumn(
-                          userModel: widget.userModel,
-                          index: widget.index,
                           icon: (Icons.email_outlined),
                           string: widget.userModel![widget.index].email),
                       ProfileTitle(title: "Location"),
                       ProfileColumn(
-                          userModel: widget.userModel,
-                          index: widget.index,
                           icon: (Icons.home),
                           string: widget.userModel![widget.index].address.city),
                       ProfileColumn(
-                          userModel: widget.userModel,
-                          index: widget.index,
                           icon: (Icons.pin_drop),
                           string:
                               widget.userModel![widget.index].address.street),
                       ProfileColumn(
-                          userModel: widget.userModel,
-                          index: widget.index,
                           icon: (Icons.pin),
                           string:
                               widget.userModel![widget.index].address.zipcode),
                       ProfileTitle(title: "Company"),
                       ProfileColumn(
-                          userModel: widget.userModel,
-                          index: widget.index,
                           icon: (Icons.work_outline),
                           string: widget.userModel![widget.index].company.name),
                       ProfileColumn(
-                          userModel: widget.userModel,
-                          index: widget.index,
                           icon: (Icons.commit_sharp),
                           string: widget.userModel![widget.index].company.bs),
                       ProfileColumn(
-                          userModel: widget.userModel,
-                          index: widget.index,
                           icon: (Icons.comment_bank_outlined),
                           string: widget
                               .userModel![widget.index].company.catchPhrase),

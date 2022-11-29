@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
 
 class ProfileColumn extends StatefulWidget {
-  List? userModel;
-  int index;
   String string;
-
   IconData icon;
   ProfileColumn({
     super.key,
-    required this.userModel,
-    required this.index,
     required this.icon,
     required this.string,
   });
