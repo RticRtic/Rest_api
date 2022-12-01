@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import "package:http/http.dart" as http;
+import 'package:rest_api/models/usermodel.dart';
 
 class PushProvider {
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
@@ -13,15 +14,16 @@ class PushProvider {
   FirebaseFirestore db = FirebaseFirestore.instance;
   FirebaseAuth auth = FirebaseAuth.instance;
   String userToken = "";
+  List<UserModel>? userModel = [];
 
-  void saveUserToken(String token) async {
-    db.collection("userToken").doc(auth.currentUser?.uid).set({"token": token});
+  void saveUserToken(String token, String id) async {
+    db.collection("userToken").doc(id).set({"token": token});
   }
 
-  void getDeviceToken() async {
+  void getDeviceToken(String id) async {
     await FirebaseMessaging.instance.getToken().then((token) {
       userToken = token as String;
-      saveUserToken(userToken);
+      saveUserToken(userToken, id);
     });
   }
 

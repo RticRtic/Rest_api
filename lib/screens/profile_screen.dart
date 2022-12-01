@@ -24,7 +24,7 @@ class _ProfilePageState extends State<ProfilePage> {
     pushProvider.requestPermission();
     pushProvider.loadFcm();
     pushProvider.listenFCM();
-    pushProvider.getDeviceToken();
+    pushProvider.getDeviceToken(widget.userModel![widget.index].id.toString());
     FirebaseMessaging.instance.subscribeToTopic("Janne");
   }
 
@@ -92,8 +92,26 @@ class _ProfilePageState extends State<ProfilePage> {
                   padding: EdgeInsets.only(
                       top: MediaQuery.of(context).size.height * 0.010)),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+                  Container(
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(100.0)),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(100.0),
+                          child: Image.network(
+                            "https://marvel-b1-cdn.bc0a.com/f00000000246364/c.tile.openstreetmap.org/15/8233/13048.png",
+                            height: MediaQuery.of(context).size.height * 0.2,
+                            width: MediaQuery.of(context).size.width * 0.45,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   Padding(
                       padding: EdgeInsets.only(
                           top: MediaQuery.of(context).size.height * 0.22)),
@@ -119,14 +137,14 @@ class _ProfilePageState extends State<ProfilePage> {
                             size: 150,
                             color: Colors.blueGrey,
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
                 ],
               ),
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.57,
+                height: MediaQuery.of(context).size.height * 0.60,
                 width: MediaQuery.of(context).size.width,
                 child: Card(
                   child: Column(
@@ -150,13 +168,17 @@ class _ProfilePageState extends State<ProfilePage> {
                           icon: (Icons.home),
                           string: widget.userModel![widget.index].address.city),
                       ProfileColumn(
-                          icon: (Icons.pin_drop),
+                          icon: (Icons.location_city_outlined),
                           string:
                               widget.userModel![widget.index].address.street),
                       ProfileColumn(
                           icon: (Icons.pin),
                           string:
                               widget.userModel![widget.index].address.zipcode),
+                      ProfileColumn(
+                          icon: (Icons.pin_drop),
+                          string:
+                              "Get ${widget.userModel![widget.index].name}s location"),
                       ProfileTitle(title: "Company"),
                       ProfileColumn(
                           icon: (Icons.work_outline),

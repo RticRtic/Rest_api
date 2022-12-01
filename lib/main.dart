@@ -52,14 +52,17 @@ class _HomeState extends State<Home> {
     pushProvider.requestPermission();
     pushProvider.loadFcm();
     pushProvider.listenFCM();
-    pushProvider.getDeviceToken();
     FirebaseMessaging.instance.subscribeToTopic("Janne");
   }
 
   void getApi() async {
     userModel = await ApiService().getEmployees();
     Future.delayed(const Duration(seconds: 1)).then((value) {
-      setState(() {});
+      setState(() {
+        for (var id in userModel!) {
+          pushProvider.getDeviceToken(id.id.toString());
+        }
+      });
     });
   }
 
