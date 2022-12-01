@@ -115,7 +115,7 @@ class _HomeState extends State<Home> {
                           "QuickMessage",
                           textAlign: TextAlign.center,
                         ),
-                        contentPadding: EdgeInsets.all(10.0),
+                        contentPadding: const EdgeInsets.all(10.0),
                         content: Container(
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
