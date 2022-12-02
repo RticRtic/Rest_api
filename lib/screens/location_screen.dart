@@ -71,12 +71,6 @@ class _LocationScreenState extends State<LocationScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    locateMe();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(

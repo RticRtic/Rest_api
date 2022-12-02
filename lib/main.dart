@@ -4,9 +4,12 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:rest_api/api/api_service.dart';
 import 'package:rest_api/models/usermodel.dart';
+import 'package:rest_api/providers/geolocater_provider.dart';
 import 'package:rest_api/providers/push_provider.dart';
 import 'package:rest_api/screens/profile_screen.dart';
 import 'package:rest_api/widgets/drawer.dart';
+import "package:open_location_code/open_location_code.dart" as olc;
+import 'package:url_launcher/url_launcher.dart';
 
 @pragma("vm:entry-point")
 Future<void> messageHandler(RemoteMessage message) async {
@@ -41,6 +44,7 @@ class _HomeState extends State<Home> {
   TextEditingController body = TextEditingController();
   FirebaseFirestore db = FirebaseFirestore.instance;
   final pushProvider = PushProvider();
+  final geoProvider = GeolocaterProvider();
   late List<UserModel>? userModel = [];
 
   @override
@@ -62,6 +66,15 @@ class _HomeState extends State<Home> {
         }
       });
     });
+  }
+
+  Future launchWebsite() async {
+    final uri = Uri.parse("https://plus.codes/map");
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.inAppWebView);
+    } else {
+      print("ERROR");
+    }
   }
 
   @override
@@ -311,6 +324,51 @@ class _HomeState extends State<Home> {
                 }),
               ),
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          geoProvider.locateMe();
+          showModalBottomSheet(
+              context: context,
+              builder: ((context) {
+                return Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color.fromARGB(126, 66, 77, 133),
+                        Color.fromARGB(177, 33, 27, 43)
+                      ],
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      FutureBuilder(
+                          future: geoProvider.getCurrentPosition(),
+                          builder: ((context, snapshot) {
+                            if (snapshot.hasData) {
+                              return GestureDetector(
+                                onTap: () {
+                                  launchWebsite();
+                                },
+                                child: const Text("Open GogleMaps?"),
+                              );
+                            } else {
+                              return const CircularProgressIndicator.adaptive(
+                                backgroundColor: Colors.white,
+                              );
+                            }
+                          }))
+                    ],
+                  ),
+                );
+              }));
+        },
+        child: const Icon(Icons.pin_drop),
+      ),
     );
   }
 }
