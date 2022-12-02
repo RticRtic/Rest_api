@@ -5,7 +5,6 @@ class ProfileColumn extends StatefulWidget {
   IconData icon;
 
   ProfileColumn({
-    super.key,
     required this.icon,
     required this.string,
   });

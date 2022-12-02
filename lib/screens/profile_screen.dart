@@ -9,7 +9,7 @@ import '../models/usermodel.dart';
 class ProfilePage extends StatefulWidget {
   List<UserModel>? userModel;
   int index;
-  ProfilePage({super.key, required this.userModel, required this.index});
+  ProfilePage({required this.userModel, required this.index});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -35,7 +35,7 @@ class _ProfilePageState extends State<ProfilePage> {
         fontFamily: "Times",
         canvasColor: Colors.transparent,
         cardColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.grey, size: 20.0),
+        iconTheme: const IconThemeData(color: Colors.black, size: 20.0),
         appBarTheme: const AppBarTheme(backgroundColor: Colors.blueGrey),
       ),
       debugShowCheckedModeBanner: false,
@@ -60,18 +60,23 @@ class _ProfilePageState extends State<ProfilePage> {
             child: const Icon(
               Icons.arrow_left,
               size: 50.0,
+              color: Colors.white,
             ),
           ),
           centerTitle: true,
-          title: Text(widget.userModel![widget.index].username),
+          title: Text(
+            widget.userModel![widget.index].username,
+            style: const TextStyle(
+                color: Colors.black, fontWeight: FontWeight.bold),
+          ),
           flexibleSpace: Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color.fromRGBO(217, 221, 240, 0.5),
-                    Color.fromRGBO(239, 236, 235, 0.7)
+                    Color.fromARGB(255, 162, 163, 169),
+                    Color.fromARGB(255, 141, 138, 143)
                   ]),
             ),
           ),
@@ -82,8 +87,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color.fromRGBO(217, 221, 240, 0.5),
-                  Color.fromRGBO(239, 236, 235, 0.7)
+                  Color.fromARGB(126, 66, 77, 133),
+                  Color.fromARGB(177, 33, 27, 43)
                 ]),
           ),
           child: Column(

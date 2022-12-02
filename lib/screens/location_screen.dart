@@ -1,29 +1,79 @@
-import 'dart:math';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:rest_api/api/api_service.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:rest_api/models/usermodel.dart';
+import "package:open_location_code/open_location_code.dart" as olc;
 
 class LocationScreen extends StatefulWidget {
   List<UserModel>? userModel;
   int index;
-  LocationScreen({super.key, required this.userModel, required this.index});
+  LocationScreen({Key? key, required this.userModel, required this.index})
+      : super(key: key);
 
   @override
   State<LocationScreen> createState() => _LocationScreenState();
 }
 
 class _LocationScreenState extends State<LocationScreen> {
-  final inputText = TextEditingController();
-  final apiService = ApiService();
   Future<UserModel>? futureUser;
 
-  void addToFirebase(String name, int age) {
-    final person = <String, dynamic>{
-      "name": name,
-      "age": age,
-    };
-    FirebaseFirestore.instance.collection("Test").add(person);
+  Future<Position> getCurrentPosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error("Location service disabled");
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error("Permission permanetly denied");
+    }
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission != LocationPermission.whileInUse &&
+          permission != LocationPermission.always) {
+        return Future.error("Permission denied");
+      }
+    }
+    return await Geolocator.getCurrentPosition();
+  }
+
+  String getPlusCode(Position fromPosition) {
+    return olc.encode(fromPosition.latitude, fromPosition.longitude,
+        codeLength: 12);
+  }
+
+  Position getPosition(String fromPlusCode) {
+    olc.CodeArea ca = olc.decode(fromPlusCode);
+    Position position = Position(
+        longitude: ca.center.longitude.toDouble(),
+        latitude: ca.center.latitude.toDouble(),
+        timestamp: null,
+        accuracy: 0.0,
+        altitude: 0.0,
+        heading: 0.0,
+        speed: 0.0,
+        speedAccuracy: 0.0);
+    return position;
+  }
+
+  void locateMe() async {
+    Position position = await getCurrentPosition();
+    print("${position.latitude}, ${position.longitude}");
+
+    String plusCode = getPlusCode(position);
+    print(plusCode);
+
+    Position positionDecoded = getPosition(plusCode);
+    print("${positionDecoded.latitude}, ${positionDecoded.longitude}");
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    locateMe();
   }
 
   @override
@@ -49,15 +99,18 @@ class _LocationScreenState extends State<LocationScreen> {
             ),
           ),
           centerTitle: true,
-          title: const Text("Location"),
+          title: const Text(
+            "Location",
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
           flexibleSpace: Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color.fromRGBO(217, 221, 240, 0.5),
-                    Color.fromRGBO(239, 236, 235, 0.7)
+                    Color.fromARGB(255, 162, 163, 169),
+                    Color.fromARGB(255, 141, 138, 143)
                   ]),
             ),
           ),
@@ -68,51 +121,18 @@ class _LocationScreenState extends State<LocationScreen> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color.fromRGBO(217, 221, 240, 0.5),
-                Color.fromRGBO(239, 236, 235, 0.7)
+                Color.fromARGB(126, 66, 77, 133),
+                Color.fromARGB(177, 33, 27, 43)
               ],
             ),
           ),
           child: Container(
-              alignment: Alignment.center,
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: inputText,
-                    decoration: const InputDecoration(hintText: "Name"),
-                  ),
-                  ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          futureUser = apiService.createUser(inputText.text);
-                        });
-                      },
-                      child: const Text("POST")),
-                  builder(),
-                  ElevatedButton(
-                      onPressed: () {
-                        addToFirebase("janne", 32);
-                      },
-                      child: const Icon(Icons.fire_extinguisher))
-                ],
-              )),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.all(8.0),
+            child: Column(children: [Text("APA")]),
+          ),
         ),
       ),
-    );
-  }
-
-  FutureBuilder<UserModel> builder() {
-    return FutureBuilder(
-      future: futureUser,
-      builder: ((context, snapshot) {
-        if (snapshot.hasData) {
-          return Text(snapshot.data!.name);
-        } else if (snapshot.hasError) {
-          return Text("${snapshot.error}");
-        }
-        return const CircularProgressIndicator();
-      }),
     );
   }
 }

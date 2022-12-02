@@ -17,25 +17,21 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(messageHandler);
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
-      home: const Home(),
+      home: Home(),
     );
   }
 }
 
 class Home extends StatefulWidget {
-  const Home({super.key});
-
   @override
   State<Home> createState() => _HomeState();
 }
@@ -78,8 +74,8 @@ class _HomeState extends State<Home> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color.fromRGBO(217, 142, 210, 0.5),
-                  Color.fromRGBO(239, 236, 222, 0.7)
+                  Color.fromARGB(255, 162, 163, 169),
+                  Color.fromARGB(255, 141, 138, 143)
                 ]),
           ),
           child: Column(
@@ -122,11 +118,11 @@ class _HomeState extends State<Home> {
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               colors: [
-                                Color.fromRGBO(217, 221, 240, 0.5),
-                                Color.fromRGBO(239, 236, 235, 0.7)
+                                Color.fromARGB(126, 66, 77, 133),
+                                Color.fromARGB(177, 33, 27, 43)
                               ],
                             ),
-                            borderRadius: BorderRadius.circular(.0),
+                            borderRadius: BorderRadius.circular(50.0),
                           ),
                           width: MediaQuery.of(context).size.width * .7,
                           child: GridView.builder(
@@ -145,8 +141,8 @@ class _HomeState extends State<Home> {
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
                                     colors: [
-                                      Color.fromRGBO(217, 221, 240, 0.5),
-                                      Color.fromRGBO(239, 236, 235, 0.7)
+                                      Color.fromARGB(255, 162, 163, 169),
+                                      Color.fromARGB(255, 141, 138, 143)
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(100.0),
@@ -233,15 +229,21 @@ class _HomeState extends State<Home> {
               ))
         ],
         centerTitle: true,
-        title: const Text("Employees"),
+        title: const Text(
+          "Employees",
+          style: TextStyle(
+              color: Colors.black,
+              fontFamily: "Times",
+              fontWeight: FontWeight.bold),
+        ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color.fromRGBO(217, 142, 210, 0.5),
-                Color.fromRGBO(239, 236, 222, 0.7)
+                Color.fromARGB(255, 162, 163, 169),
+                Color.fromARGB(255, 141, 138, 143)
               ],
             ),
           ),
@@ -259,8 +261,8 @@ class _HomeState extends State<Home> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Color.fromRGBO(217, 142, 210, 0.5),
-                      Color.fromRGBO(239, 236, 222, 0.7)
+                      Color.fromARGB(126, 66, 77, 133),
+                      Color.fromARGB(177, 33, 27, 43)
                     ]),
               ),
               child: GridView.builder(

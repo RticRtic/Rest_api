@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AlertDialog extends StatelessWidget {
-  const AlertDialog({super.key});
+  const AlertDialog();
 
   @override
   Widget build(BuildContext context) {

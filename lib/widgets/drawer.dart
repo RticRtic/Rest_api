@@ -6,7 +6,6 @@ class DrawerItem extends StatefulWidget {
   TextEditingController message = TextEditingController();
 
   DrawerItem({
-    super.key,
     required this.title,
     required this.message,
   });

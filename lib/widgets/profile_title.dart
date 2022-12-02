@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class ProfileTitle extends StatefulWidget {
   String title;
-  ProfileTitle({super.key, required this.title});
+  ProfileTitle({required this.title});
 
   @override
   State<ProfileTitle> createState() => _ProfileTitleState();
