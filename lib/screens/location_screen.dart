@@ -102,9 +102,7 @@ class _LocationScreenState extends State<LocationScreen> {
                   );
                 }
               })),
-          floatingActionButton: ModalSheet(
-            userModel: widget.userModel,
-          )),
+          floatingActionButton: ModalSheet(userModel: widget.userModel)),
     );
   }
 }

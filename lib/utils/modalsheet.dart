@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:rest_api/models/usermodel.dart';
+import 'package:rest_api/providers/geolocater_provider.dart';
 
 class ModalSheet extends StatefulWidget {
   final List<UserModel>? userModel;
@@ -8,6 +10,8 @@ class ModalSheet extends StatefulWidget {
   @override
   State<ModalSheet> createState() => _ModalSheetState();
 }
+
+final geoProvider = GeolocaterProvider();
 
 class _ModalSheetState extends State<ModalSheet> {
   @override
@@ -43,7 +47,11 @@ class _ModalSheetState extends State<ModalSheet> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () {
+                            geoProvider.locateEmployee(
+                                widget.userModel![index].address.geo.lat,
+                                widget.userModel![index].address.geo.lat);
+                          },
                           child: Text(
                             widget.userModel![index].username,
                             style: const TextStyle(

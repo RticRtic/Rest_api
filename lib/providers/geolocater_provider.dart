@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:geolocator/geolocator.dart';
 import "package:open_location_code/open_location_code.dart" as olc;
 
@@ -58,5 +60,9 @@ class GeolocaterProvider {
     print("${positionDecoded.latitude}, ${positionDecoded.longitude}");
   }
 
-  void getEmployeePlusCode(Position lat, Position long) async {}
+  void locateEmployee(String lat, String long) {
+    var employeePlusCode =
+        olc.encode(double.parse(lat), double.parse(long), codeLength: 12);
+    print(employeePlusCode);
+  }
 }
