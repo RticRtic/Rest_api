@@ -1,12 +1,17 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:rest_api/models/usermodel.dart';
-import "package:open_location_code/open_location_code.dart" as olc;
+import 'package:rest_api/providers/geolocater_provider.dart';
+import 'package:rest_api/utils/modalsheet.dart';
+import "dart:io";
+import "package:webview_flutter/webview_flutter.dart";
 
 class LocationScreen extends StatefulWidget {
-  List<UserModel>? userModel;
-  int index;
-  LocationScreen({Key? key, required this.userModel, required this.index})
+  final String plusCode;
+  final List<UserModel>? userModel;
+  LocationScreen({Key? key, required this.plusCode, required this.userModel})
       : super(key: key);
 
   @override
@@ -14,60 +19,13 @@ class LocationScreen extends StatefulWidget {
 }
 
 class _LocationScreenState extends State<LocationScreen> {
-  Future<UserModel>? futureUser;
+  late WebViewController controller;
+  final geoProvider = GeolocaterProvider();
 
-  Future<Position> getCurrentPosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error("Location service disabled");
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error("Permission permanetly denied");
-    }
-
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission != LocationPermission.whileInUse &&
-          permission != LocationPermission.always) {
-        return Future.error("Permission denied");
-      }
-    }
-    return await Geolocator.getCurrentPosition();
-  }
-
-  String getPlusCode(Position fromPosition) {
-    return olc.encode(fromPosition.latitude, fromPosition.longitude,
-        codeLength: 12);
-  }
-
-  Position getPosition(String fromPlusCode) {
-    olc.CodeArea ca = olc.decode(fromPlusCode);
-    Position position = Position(
-        longitude: ca.center.longitude.toDouble(),
-        latitude: ca.center.latitude.toDouble(),
-        timestamp: null,
-        accuracy: 0.0,
-        altitude: 0.0,
-        heading: 0.0,
-        speed: 0.0,
-        speedAccuracy: 0.0);
-    return position;
-  }
-
-  void locateMe() async {
-    Position position = await getCurrentPosition();
-    print("${position.latitude}, ${position.longitude}");
-
-    String plusCode = getPlusCode(position);
-    print(plusCode);
-
-    Position positionDecoded = getPosition(plusCode);
-    print("${positionDecoded.latitude}, ${positionDecoded.longitude}");
+  @override
+  void initState() {
+    super.initState();
+    if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
   }
 
   @override
@@ -82,51 +40,71 @@ class _LocationScreenState extends State<LocationScreen> {
       ),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: AppBar(
-          leading: GestureDetector(
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-            child: const Icon(
-              Icons.arrow_left,
-              size: 50.0,
+          appBar: AppBar(
+            leading: GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop();
+              },
+              child: const Icon(
+                Icons.arrow_left,
+                size: 50.0,
+              ),
+            ),
+            centerTitle: true,
+            title: Text(
+              "Ur Location is ${widget.plusCode}",
+              style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0),
+            ),
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color.fromARGB(255, 162, 163, 169),
+                      Color.fromARGB(255, 141, 138, 143)
+                    ]),
+              ),
             ),
           ),
-          centerTitle: true,
-          title: const Text(
-            "Location",
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-          ),
-          flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color.fromARGB(255, 162, 163, 169),
-                    Color.fromARGB(255, 141, 138, 143)
-                  ]),
-            ),
-          ),
-        ),
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color.fromARGB(126, 66, 77, 133),
-                Color.fromARGB(177, 33, 27, 43)
-              ],
-            ),
-          ),
-          child: Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.all(8.0),
-            child: Column(children: [Text("APA")]),
-          ),
-        ),
-      ),
+          body: FutureBuilder(
+              future: geoProvider.getCurrentPosition(),
+              builder: ((context, snapshot) {
+                if (snapshot.hasData) {
+                  return WebView(
+                    initialUrl: 'https://plus.codes/map',
+                    javascriptMode: JavascriptMode.unrestricted,
+                    onWebViewCreated: (controller) {
+                      this.controller = controller;
+                    },
+                  );
+                } else {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Text(
+                          "Please wait loading plusCode ...",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        Padding(padding: EdgeInsets.only(top: 10.0)),
+                        CircularProgressIndicator.adaptive(
+                          backgroundColor: Colors.white,
+                        )
+                      ],
+                    ),
+                  );
+                }
+              })),
+          floatingActionButton: ModalSheet(
+            userModel: widget.userModel,
+          )),
     );
   }
 }

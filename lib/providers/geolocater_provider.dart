@@ -57,4 +57,6 @@ class GeolocaterProvider {
     Position positionDecoded = getPosition(plusCode);
     print("${positionDecoded.latitude}, ${positionDecoded.longitude}");
   }
+
+  void getEmployeePlusCode(Position lat, Position long) async {}
 }

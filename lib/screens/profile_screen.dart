@@ -130,13 +130,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: ((context) => LocationScreen(
-                                      userModel: widget.userModel,
-                                      index: widget.index,
-                                    ))));
-                          },
+                          onTap: () {},
                           child: const Icon(
                             Icons.person,
                             size: 150,
